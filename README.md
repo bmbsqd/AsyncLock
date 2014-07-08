@@ -33,3 +33,8 @@ using( await _lock.WithoutContext ) {
 Lightweight, fast, no tasks involved in the await process, very little overhead, `Interlocked`.
 
 Internally uses `ConcurrentQueue` to hold waiters, but will bypass structure completely if there's nothing to wait for.
+
+## Alternatives ##
+ - Nito AsyncEx -- http://nitoasyncex.codeplex.com/
+ - W8 and WP8 -- https://www.nuget.org/packages/Enough.AsyncLock/
+ - [System.Threading.SemaphoreSlim](http://msdn.microsoft.com/en-us/library/system.threading.semaphoreslim(v=vs.110).aspx) 
