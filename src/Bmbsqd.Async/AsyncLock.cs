@@ -1,4 +1,13 @@
-﻿using System;
+﻿#region Creative Commons, Attribution-ShareAlike 3.0 Unported
+/*
+	Creative Commons
+	Attribution-ShareAlike 3.0 Unported
+
+	http://creativecommons.org/licenses/by-sa/3.0/
+*/
+#endregion
+
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
@@ -30,8 +39,7 @@ namespace Bmbsqd.Async
 				AsyncLockWaiter waiter;
 				if( _waiters.TryDequeue( out waiter ) ) {
 					RunWaiter( waiter );
-				}
-				else {
+				} else {
 					ReleaseControl();
 				}
 			}
