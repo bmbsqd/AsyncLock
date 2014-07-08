@@ -36,5 +36,5 @@ Internally uses `ConcurrentQueue` to hold waiters, but will bypass structure com
 
 ## Alternatives ##
  - Nito AsyncEx -- http://nitoasyncex.codeplex.com/
- - W8 and WP8 -- https://www.nuget.org/packages/Enough.AsyncLock/
+ - W8 and WP8 -- http://asynclock.codeplex.com/
  - [System.Threading.SemaphoreSlim](http://msdn.microsoft.com/en-us/library/system.threading.semaphoreslim(v=vs.110).aspx) 
