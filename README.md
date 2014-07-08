@@ -40,6 +40,6 @@ Internally uses `ConcurrentQueue` to hold waiters, but will bypass structure com
  - [System.Threading.SemaphoreSlim](http://msdn.microsoft.com/en-us/library/system.threading.semaphoreslim(v=vs.110).aspx) 
 
 ## Gotchas ##
-AsyncLock is not re-entrant and will fail deadlock its self when entering the same lock multiple times on same execution path
+AsyncLock is not reentrant and will fail deadlock its self when entering the same lock multiple times on same execution path
 
 There's no deadlock monitoring built in.
