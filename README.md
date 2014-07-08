@@ -30,4 +30,6 @@ using( await _lock.WithoutContext ) {
 ```
 
 ## Why? ##
-Lightweight, fast, no tasks involved in the await process
+Lightweight, fast, no tasks involved in the await process, very little overhead, `Interlocked`.
+
+Internally uses `ConcurrentQueue` to hold waiters, but will bypass structure completely if there's nothing to wait for.
