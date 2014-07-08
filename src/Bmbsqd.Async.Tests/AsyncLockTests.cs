@@ -26,8 +26,8 @@ namespace Bmbsqd.Async.Tests
 			}
 		}
 
-		[Test, Timeout( 500 ), Ignore( "No, current AsyncLock is NOT re-entrant" )]
-		public async Task ReEntrantAware()
+		[Test, Timeout( 500 ), Ignore( "No, current AsyncLock is NOT reentrant" )]
+		public async Task ReentrantAware()
 		{
 			var _lock = new AsyncLock();
 
