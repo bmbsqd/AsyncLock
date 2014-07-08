@@ -3,7 +3,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<metadata>
 		<id>Bmbsqd.AsyncLock</id>
-		<version>0.0.1-beta1</version>
+		<version>0.0.2-beta1</version>
 		<title>AsyncLock</title>
 		<authors>BMBSQD</authors>
 		<owners>BMBSQD</owners>
@@ -12,7 +12,7 @@
 		<projectUrl>https://github.com/bmbsqd/AsyncLock/</projectUrl>
 		<iconUrl>http://www.gravatar.com/avatar/778137d42770f739df317b3cde5454ed.png?s=128</iconUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<releaseNotes>Initial Release</releaseNotes>
+		<releaseNotes>Synchronous fast path</releaseNotes>
 		<copyright>© Bombsquad Inc 2014</copyright>
 		<tags>async lock await</tags>
 	</metadata>

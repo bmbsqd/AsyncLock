@@ -70,6 +70,11 @@ namespace Bmbsqd.Async
 			get { return this; }
 		}
 
+		public bool HasLock
+		{
+			get { return _current != null; }
+		}
+
 		private IAwaiter<IDisposable> GetAwaiter( ExecutionContext executionContext )
 		{
 			var waiter = new AsyncLockWaiter( this, executionContext );
