@@ -1,4 +1,13 @@
-﻿using System;
+﻿#region Creative Commons, Attribution-ShareAlike 3.0 Unported
+/*
+	Creative Commons
+	Attribution-ShareAlike 3.0 Unported
+
+	http://creativecommons.org/licenses/by-sa/3.0/
+*/
+#endregion
+
+using System;
 using System.Globalization;
 using System.Threading;
 
@@ -34,19 +43,25 @@ namespace Bmbsqd.Async
 		private readonly AsyncLock _lock;
 		private readonly ExecutionContext _executionContext;
 
-		public void Ready()
+		public void Ready( bool synchronously )
 		{
 			if( Interlocked.CompareExchange( ref _state, State.Running, State.Waiting ) == State.Waiting ) {
 				var continuation = Interlocked.Exchange( ref _continuation, null );
 				if( continuation != null ) {
-					ScheduleContinuation( _executionContext, continuation );
+					ScheduleContinuation( _executionContext, continuation, synchronously );
 				}
 			}
 		}
 
-		private static void ScheduleContinuation( ExecutionContext executionContext, Action continuation )
+		private static void ScheduleContinuation( ExecutionContext executionContext, Action continuation, bool synchronously )
 		{
-			if( executionContext != null ) {
+			if( synchronously ) {
+				// This could probably never happen as the OnComplete() would be 
+				// called after GetAwaiter() and there would be no continuation 
+				// to execute at this point.. 
+				continuation(); 
+			}
+			else if( executionContext != null ) {
 				ThreadPool.UnsafeQueueUserWorkItem( state => {
 					var c = (ContextAndAction)state;
 					ExecutionContext.Run( c.ExecutionContext, cont => ((Action)cont)(), c.Continuation );

@@ -57,12 +57,12 @@ namespace Bmbsqd.Async
 			return Interlocked.CompareExchange( ref _current, Sentinel.Value, null ) == null;
 		}
 
-		private void RunWaiter( AsyncLockWaiter waiter )
+		private void RunWaiter( AsyncLockWaiter waiter, bool synchronously = false )
 		{
 			if( Interlocked.Exchange( ref _current, waiter ) != Sentinel.Value ) {
 				Debug.Assert( false, "Invalid start state", "Expected current waiter to be {0} but was {1}", Sentinel.Value, _current );
 			}
-			waiter.Ready();
+			waiter.Ready( synchronously );
 		}
 
 		public INoCapturedContextAwaitable<IDisposable> WithoutContext
@@ -74,7 +74,7 @@ namespace Bmbsqd.Async
 		{
 			var waiter = new AsyncLockWaiter( this, executionContext );
 			if( TryTakeControl() ) {
-				RunWaiter( waiter );
+				RunWaiter( waiter, synchronously: true );
 			}
 			else {
 				_waiters.Enqueue( waiter );
