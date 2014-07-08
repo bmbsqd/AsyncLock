@@ -28,3 +28,6 @@ using( await _lock.WithoutContext ) {
 	_log.Info( "Inside Lock, may or may not be in same execution context" );
 }
 ```
+
+## Why? ##
+Lightweight, fast, no tasks involved in the await process
