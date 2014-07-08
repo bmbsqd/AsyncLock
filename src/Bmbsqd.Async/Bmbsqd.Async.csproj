@@ -44,6 +44,10 @@
     <Compile Include="Sentinel.cs" />
     <Compile Include="AsyncLockWaiter.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Bmbsqd.ElasticIdentity.nuspec" />
+    <None Include="build.cmd" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

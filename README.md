@@ -3,7 +3,11 @@ AsyncLock
 
 Async/Awaitable light, non-blocking lock in C#
 
+
 ## Usage ##
+
+First install the nuget package https://www.nuget.org/packages/Bmbsqd.AsyncLock/
+
 
 To create a new lock, you have to new it up
 ```csharp
