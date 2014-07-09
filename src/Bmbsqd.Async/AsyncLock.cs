@@ -17,16 +17,16 @@ namespace Bmbsqd.Async
 	public class AsyncLock : IAwaitable<IDisposable>
 	{
 		private object _current;
-		private readonly ConcurrentQueue<AsyncLockWaiter> _waiters;
+		private readonly ConcurrentQueue<WaiterBase> _waiters;
 
 		public AsyncLock()
 		{
-			_waiters = new ConcurrentQueue<AsyncLockWaiter>();
+			_waiters = new ConcurrentQueue<WaiterBase>();
 		}
 
-		internal void Done( AsyncLockWaiter waiter )
+		internal void Done( IAwaiter<IDisposable> waiter )
 		{
-			var oldWaiter = Interlocked.Exchange( ref _current, null );
+			var oldWaiter = Interlocked.CompareExchange( ref _current, null, waiter );
 			if( oldWaiter != waiter ) {
 				Debug.Assert( false, "Invalid end state", "Expected current waiter to be {0} but was {1}", waiter, oldWaiter );
 			}
@@ -36,10 +36,11 @@ namespace Bmbsqd.Async
 		private void TryNext()
 		{
 			if( TryTakeControl() ) {
-				AsyncLockWaiter waiter;
+				WaiterBase waiter;
 				if( _waiters.TryDequeue( out waiter ) ) {
 					RunWaiter( waiter );
-				} else {
+				}
+				else {
 					ReleaseControl();
 				}
 			}
@@ -57,12 +58,12 @@ namespace Bmbsqd.Async
 			return Interlocked.CompareExchange( ref _current, Sentinel.Value, null ) == null;
 		}
 
-		private void RunWaiter( AsyncLockWaiter waiter, bool synchronously = false )
+		private void RunWaiter( WaiterBase waiter )
 		{
 			if( Interlocked.Exchange( ref _current, waiter ) != Sentinel.Value ) {
 				Debug.Assert( false, "Invalid start state", "Expected current waiter to be {0} but was {1}", Sentinel.Value, _current );
 			}
-			waiter.Ready( synchronously );
+			waiter.Ready();
 		}
 
 		public bool HasLock
@@ -72,11 +73,14 @@ namespace Bmbsqd.Async
 
 		public IAwaiter<IDisposable> GetAwaiter()
 		{
-			var waiter = new AsyncLockWaiter( this );
+			WaiterBase waiter;
 			if( TryTakeControl() ) {
-				RunWaiter( waiter, synchronously: true );
+				waiter = new NonBlockedWaiter( this );
+				RunWaiter( waiter );
+				
 			}
 			else {
+				waiter = new AsyncLockWaiter( this );
 				_waiters.Enqueue( waiter );
 				TryNext();
 			}

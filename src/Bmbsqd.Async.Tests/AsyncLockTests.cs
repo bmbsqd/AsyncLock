@@ -101,14 +101,16 @@ namespace Bmbsqd.Async.Tests
 					// assumes the lock is taken at this point
 					Assert.That( _lock.HasLock, Is.True );
 
-					using( await _lock ) {
+					using( var l = await _lock ) {
+						Console.WriteLine( l );
 						var properCallback1 = StackHelper.CurrentCallStack.Any( f => f.GetMethod().DeclaringType == typeof( ExecutionContext ) );
 						Assert.That( properCallback1, Is.True );
 						next( 2 );
 					}
 				} );
 
-				using( await _lock ) {
+				using( var l = await _lock ) {
+					Console.WriteLine( l );
 					next( 0 );
 					await Task.Delay( 500 );
 					next( 1 );

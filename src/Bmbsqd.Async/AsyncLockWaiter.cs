@@ -8,12 +8,11 @@
 #endregion
 
 using System;
-using System.Globalization;
 using System.Threading;
 
 namespace Bmbsqd.Async
 {
-	internal class AsyncLockWaiter : IAwaiter<IDisposable>, IDisposable
+	internal sealed class AsyncLockWaiter : WaiterBase
 	{
 		private struct State
 		{
@@ -40,15 +39,14 @@ namespace Bmbsqd.Async
 
 		private Action _continuation;
 		private int _state;
-		private readonly AsyncLock _lock;
 		private ExecutionContext _executionContext;
 
-		public void Ready( bool synchronously )
+		public override void Ready()
 		{
 			if( Interlocked.CompareExchange( ref _state, State.Running, State.Waiting ) == State.Waiting ) {
 				var continuation = Interlocked.Exchange( ref _continuation, null );
 				if( continuation != null ) {
-					ScheduleContinuation( _executionContext, continuation, synchronously );
+					ScheduleContinuation( _executionContext, continuation);
 				}
 			}
 		}
@@ -65,26 +63,18 @@ namespace Bmbsqd.Async
 			}
 		}
 
-		private static void ScheduleContinuation( ExecutionContext executionContext, Action continuation, bool synchronously )
+		private static void ScheduleContinuation( ExecutionContext executionContext, Action continuation )
 		{
-			if( synchronously ) {
-				// This could probably never happen as the OnComplete() would be 
-				// called after GetAwaiter() and there would be no continuation 
-				// to execute at this point.. 
-				continuation();
-			}
-			else {
-				var callbackState = new ContextAndAction( executionContext, continuation );
-				ThreadPool.UnsafeQueueUserWorkItem( ContinuationCallback, callbackState );
-			}
+			var callbackState = new ContextAndAction( executionContext, continuation );
+			ThreadPool.UnsafeQueueUserWorkItem( ContinuationCallback, callbackState );
 		}
 
 		public AsyncLockWaiter( AsyncLock @lock )
+			: base( @lock )
 		{
-			_lock = @lock;
 		}
 
-		private void OnCompleted( Action continuation, bool captureExecutionContext )
+		protected override void OnCompleted( Action continuation, bool captureExecutionContext )
 		{
 			if( _state == State.Waiting ) {
 				_continuation = continuation;
@@ -97,36 +87,21 @@ namespace Bmbsqd.Async
 			}
 		}
 
-		public void OnCompleted( Action continuation )
-		{
-			OnCompleted( continuation, true );
-		}
-
-		public void UnsafeOnCompleted( Action continuation )
-		{
-			OnCompleted( continuation, false );
-		}
-
-		public bool IsCompleted
+		public override bool IsCompleted
 		{
 			get { return _state != State.Waiting; }
 		}
 
-		public IDisposable GetResult()
-		{
-			return this;
-		}
-
-		public void Dispose()
+		public override void Dispose()
 		{
 			if( Interlocked.CompareExchange( ref _state, State.Done, State.Running ) == State.Running ) {
-				_lock.Done( this );
+				base.Dispose();
 			}
 		}
 
 		public override string ToString()
 		{
-			return GetHashCode().ToString( "x8", CultureInfo.InvariantCulture );
+			return "AsyncWaiter: " + base.ToString();
 		}
 	}
 }
