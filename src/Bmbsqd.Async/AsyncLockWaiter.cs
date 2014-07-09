@@ -24,16 +24,16 @@ namespace Bmbsqd.Async
 
 		private class ContextAndAction
 		{
-			private readonly ExecutionContext _executionContext;
+			private readonly ExecutionContext _context;
 			private readonly Action _continuation;
 
-			public ContextAndAction( ExecutionContext executionContext, Action continuation )
+			public ContextAndAction( ExecutionContext context, Action continuation )
 			{
-				_executionContext = executionContext;
+				_context = context;
 				_continuation = continuation;
 			}
 
-			public ExecutionContext ExecutionContext { get { return _executionContext; } }
+			public ExecutionContext Context { get { return _context; } }
 			public Action Continuation { get { return _continuation; } }
 		}
 
@@ -41,7 +41,7 @@ namespace Bmbsqd.Async
 		private Action _continuation;
 		private int _state;
 		private readonly AsyncLock _lock;
-		private readonly ExecutionContext _executionContext;
+		private ExecutionContext _executionContext;
 
 		public void Ready( bool synchronously )
 		{
@@ -53,40 +53,58 @@ namespace Bmbsqd.Async
 			}
 		}
 
+		private static void ContinuationCallback( object state )
+		{
+			var c = (ContextAndAction)state;
+			if( c.Context != null ) {
+				ExecutionContext.Run( c.Context, x => ((Action)x)(), c.Continuation );
+				c.Context.Dispose();
+			}
+			else {
+				c.Continuation();
+			}
+		}
+
 		private static void ScheduleContinuation( ExecutionContext executionContext, Action continuation, bool synchronously )
 		{
 			if( synchronously ) {
 				// This could probably never happen as the OnComplete() would be 
 				// called after GetAwaiter() and there would be no continuation 
 				// to execute at this point.. 
-				continuation(); 
-			}
-			else if( executionContext != null ) {
-				ThreadPool.UnsafeQueueUserWorkItem( state => {
-					var c = (ContextAndAction)state;
-					ExecutionContext.Run( c.ExecutionContext, cont => ((Action)cont)(), c.Continuation );
-					executionContext.Dispose();
-				}, new ContextAndAction( executionContext, continuation ) );
+				continuation();
 			}
 			else {
-				ThreadPool.UnsafeQueueUserWorkItem( state => ((Action)state)(), continuation );
+				var callbackState = new ContextAndAction( executionContext, continuation );
+				ThreadPool.UnsafeQueueUserWorkItem( ContinuationCallback, callbackState );
 			}
 		}
 
-		public AsyncLockWaiter( AsyncLock @lock, ExecutionContext executionContext )
+		public AsyncLockWaiter( AsyncLock @lock )
 		{
 			_lock = @lock;
-			_executionContext = executionContext;
 		}
 
-		public void OnCompleted( Action continuation )
+		private void OnCompleted( Action continuation, bool captureExecutionContext )
 		{
 			if( _state == State.Waiting ) {
 				_continuation = continuation;
+				if( captureExecutionContext ) {
+					_executionContext = ExecutionContext.Capture();
+				}
 			}
 			else if( continuation != null ) {
 				continuation();
 			}
+		}
+
+		public void OnCompleted( Action continuation )
+		{
+			OnCompleted( continuation, true );
+		}
+
+		public void UnsafeOnCompleted( Action continuation )
+		{
+			OnCompleted( continuation, false );
 		}
 
 		public bool IsCompleted

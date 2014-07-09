@@ -14,7 +14,7 @@ using System.Threading;
 
 namespace Bmbsqd.Async
 {
-	public class AsyncLock : IAwaitable<IDisposable>, INoCapturedContextAwaitable<IDisposable>
+	public class AsyncLock : IAwaitable<IDisposable>
 	{
 		private object _current;
 		private readonly ConcurrentQueue<AsyncLockWaiter> _waiters;
@@ -26,9 +26,9 @@ namespace Bmbsqd.Async
 
 		internal void Done( AsyncLockWaiter waiter )
 		{
-			var old = Interlocked.Exchange( ref _current, null );
-			if( old != waiter ) {
-				Debug.Assert( false, "Invalid end state", "Expected current waiter to be {0} but was {1}", waiter, old );
+			var oldWaiter = Interlocked.Exchange( ref _current, null );
+			if( oldWaiter != waiter ) {
+				Debug.Assert( false, "Invalid end state", "Expected current waiter to be {0} but was {1}", waiter, oldWaiter );
 			}
 			TryNext();
 		}
@@ -65,19 +65,14 @@ namespace Bmbsqd.Async
 			waiter.Ready( synchronously );
 		}
 
-		public INoCapturedContextAwaitable<IDisposable> WithoutContext
-		{
-			get { return this; }
-		}
-
 		public bool HasLock
 		{
 			get { return _current != null; }
 		}
 
-		private IAwaiter<IDisposable> GetAwaiter( ExecutionContext executionContext )
+		public IAwaiter<IDisposable> GetAwaiter()
 		{
-			var waiter = new AsyncLockWaiter( this, executionContext );
+			var waiter = new AsyncLockWaiter( this );
 			if( TryTakeControl() ) {
 				RunWaiter( waiter, synchronously: true );
 			}
@@ -86,17 +81,6 @@ namespace Bmbsqd.Async
 				TryNext();
 			}
 			return waiter;
-		}
-
-		IAwaiter<IDisposable> INoCapturedContextAwaitable<IDisposable>.GetAwaiter()
-		{
-			return GetAwaiter( null );
-		}
-
-		public IAwaiter<IDisposable> GetAwaiter()
-		{
-			var executionContext = ExecutionContext.Capture();
-			return GetAwaiter( executionContext );
 		}
 	}
 }

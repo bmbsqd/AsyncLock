@@ -44,7 +44,9 @@
   <ItemGroup>
     <Compile Include="AsyncLockTests.cs" />
     <Compile Include="FakePrincipal.cs" />
+    <Compile Include="FakeSynchronizationContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StackHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

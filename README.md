@@ -21,14 +21,6 @@ using( await _lock ) {
 }
 ```
 
-
-If you don't need the continuation to retain the execution context then use the `WithoutContext` property
-```csharp
-using( await _lock.WithoutContext ) {
-	_log.Info( "Inside Lock, may or may not be in same execution context" );
-}
-```
-
 ## Why? ##
 Lightweight, fast, no tasks involved in the await process, very little overhead, `Interlocked`.
 

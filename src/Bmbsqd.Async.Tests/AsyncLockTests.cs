@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -9,6 +10,15 @@ namespace Bmbsqd.Async.Tests
 	[TestFixture]
 	public class AsyncLockTests
 	{
+		[Test, Timeout( 1000 )]
+		public async Task Simple()
+		{
+			var _lock = new AsyncLock();
+			using( await _lock ) {
+				Console.WriteLine( "Locked" );
+			}
+		}
+
 		[Test]
 		public async Task ExceptionShouldFlow()
 		{
@@ -68,9 +78,9 @@ namespace Bmbsqd.Async.Tests
 			catch( Exception e ) { }
 			Assert.That( _lock.HasLock, Is.False );
 		}
-
+		
 		[Test]
-		public async Task ProperlyWaitsForRelease()
+		public async Task ProperlyWaitsForReleaseAndCallsBackThruContext()
 		{
 			var _lock = new AsyncLock();
 
@@ -83,28 +93,31 @@ namespace Bmbsqd.Async.Tests
 				}
 			};
 
-			Func<Task> a = async () => {
+
+			await Task.Run( async () => {
+
+				var subTask = Task.Run( async () => {
+					await Task.Delay( 50 );
+					// assumes the lock is taken at this point
+					Assert.That( _lock.HasLock, Is.True );
+
+					using( await _lock ) {
+						var properCallback1 = StackHelper.CurrentCallStack.Any( f => f.GetMethod().DeclaringType == typeof( ExecutionContext ) );
+						Assert.That( properCallback1, Is.True );
+						next( 2 );
+					}
+				} );
+
 				using( await _lock ) {
 					next( 0 );
 					await Task.Delay( 500 );
 					next( 1 );
 				}
-			};
 
-			Func<Task> b = async () => {
-				// assumes the lock is taken at this point
-				using( await _lock ) {
-					next( 2 );
-				}
-			};
-
-			var taskA = Task.Run( a ); await Task.Delay( 100 );
-			var taskB = Task.Run( b );
-
-			await Task.WhenAll( taskA, taskB );
+				await subTask;
+			} );
 
 			Assert.That( successfullSteps, Is.EqualTo( 3 ) );
-
 		}
 	}
 }

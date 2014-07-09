@@ -39,7 +39,6 @@
     <Compile Include="AsyncLock.cs" />
     <Compile Include="IAwaitable.cs" />
     <Compile Include="IAwaiter.cs" />
-    <Compile Include="INoCapturedContextAwaitable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sentinel.cs" />
     <Compile Include="AsyncLockWaiter.cs" />
