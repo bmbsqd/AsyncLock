@@ -7,7 +7,7 @@
 		<title>AsyncLock</title>
 		<authors>BMBSQD</authors>
 		<owners>BMBSQD</owners>
-		<description>Non-blocking async/await-able lock</description>
+		<description>Non-blocking, fast and lightweight async/await-able lock</description>
 		<licenseUrl>http://creativecommons.org/licenses/by-sa/3.0/</licenseUrl>
 		<projectUrl>https://github.com/bmbsqd/AsyncLock/</projectUrl>
 		<iconUrl>http://www.gravatar.com/avatar/778137d42770f739df317b3cde5454ed.png?s=128</iconUrl>

@@ -32,7 +32,7 @@ Internally uses `ConcurrentQueue` to hold waiters, but will bypass structure com
  - [System.Threading.SemaphoreSlim](http://msdn.microsoft.com/en-us/library/system.threading.semaphoreslim(v=vs.110).aspx) 
 
 ## Gotchas ##
-AsyncLock is not reentrant and will fail deadlock its self when entering the same lock multiple times on same execution path
+AsyncLock is not reentrant and will deadlock its self when entering the same lock multiple times on same execution path
 
 There's no deadlock monitoring built in.
 
@@ -47,3 +47,6 @@ Waiting Path:
   - 2x Interlocked on exit
   - Slightly larger memory footprint
   - ConcurrentQueue Enqueue/TryDequeue calls
+
+## Future plans ##
+  - Move `GetAwaiter()` result to a struct and keep lock reference and potential heavier `Waiter` class references in the struct
