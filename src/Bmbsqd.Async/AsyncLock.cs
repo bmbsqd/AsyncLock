@@ -14,6 +14,7 @@ using System.Threading;
 
 namespace Bmbsqd.Async
 {
+	[DebuggerDisplay( "HasLock = {HasLock}, Waiting = {WaitingCount}" )]
 	public class AsyncLock : IAwaitable<IDisposable>
 	{
 		private object _current;
@@ -71,13 +72,19 @@ namespace Bmbsqd.Async
 			get { return _current != null; }
 		}
 
+		private int WaitingCount
+		{
+			// only used in debug view
+			get { return _waiters.Count; }
+		}
+
 		public IAwaiter<IDisposable> GetAwaiter()
 		{
 			WaiterBase waiter;
 			if( TryTakeControl() ) {
 				waiter = new NonBlockedWaiter( this );
 				RunWaiter( waiter );
-				
+
 			}
 			else {
 				waiter = new AsyncLockWaiter( this );
