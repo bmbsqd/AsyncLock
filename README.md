@@ -42,7 +42,7 @@ Best case
   - 1x Interlocked on exit
 
 Worst case:
-  - 2x Interlocked on enter
+  - 3x Interlocked on enter
   - 1x Interlocked on exit
   - ConcurrentQueue Enqueue/TryDequeue calls
 
