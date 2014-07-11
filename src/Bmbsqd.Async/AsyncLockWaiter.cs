@@ -8,6 +8,7 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace Bmbsqd.Async
@@ -43,11 +44,11 @@ namespace Bmbsqd.Async
 
 		public override void Ready()
 		{
-			if( Interlocked.CompareExchange( ref _state, State.Running, State.Waiting ) == State.Waiting ) {
-				var continuation = Interlocked.Exchange( ref _continuation, null );
-				if( continuation != null ) {
-					ScheduleContinuation( _executionContext, continuation);
-				}
+			Debug.Assert( _state == State.Waiting, "Unexpected state", "Expected state to be {0} but was {1}", State.Waiting, _state );
+			_state = State.Running;
+			var continuation = Interlocked.Exchange( ref _continuation, null );
+			if( continuation != null ) {
+				ScheduleContinuation( _executionContext, continuation );
 			}
 		}
 
@@ -76,6 +77,7 @@ namespace Bmbsqd.Async
 
 		protected override void OnCompleted( Action continuation, bool captureExecutionContext )
 		{
+			Debug.Assert( _state != State.Running, "OnComplete() should never be called when state == Running" );
 			if( _state == State.Waiting ) {
 				_continuation = continuation;
 				if( captureExecutionContext ) {
@@ -87,16 +89,16 @@ namespace Bmbsqd.Async
 			}
 		}
 
-		public override bool IsCompleted
+		public override bool IsCompleted // this is the AWAIT complete, not the waiter block
 		{
 			get { return _state != State.Waiting; }
 		}
 
 		public override void Dispose()
 		{
-			if( Interlocked.CompareExchange( ref _state, State.Done, State.Running ) == State.Running ) {
-				base.Dispose();
-			}
+			Debug.Assert( _state == State.Running, "Dispose() should only be called on a Running state" );
+			_state = State.Done;
+			base.Dispose();
 		}
 
 		public override string ToString()

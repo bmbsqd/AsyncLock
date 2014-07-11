@@ -37,16 +37,15 @@ AsyncLock is not reentrant and will deadlock its self when entering the same loc
 There's no deadlock monitoring built in.
 
 ## It's fast and lightweight ##
-Fast Path:
+Best case
+  - 1x Interlocked on enter
+  - 1x Interlocked on exit
+
+Worst case:
   - 2x Interlocked on enter
   - 1x Interlocked on exit
-  - Very low memory, but unfortunately still one heap allocation 
-
-Waiting Path:
-  - 4x Interlocked on enter
-  - 2x Interlocked on exit
-  - Slightly larger memory footprint
   - ConcurrentQueue Enqueue/TryDequeue calls
 
 ## Future plans ##
   - Move `GetAwaiter()` result to a struct and keep lock reference and potential heavier `Waiter` class references in the struct
+

@@ -8,9 +8,9 @@ using NUnit.Framework;
 namespace Bmbsqd.Async.PerfTests
 {
 	[TestFixture]
-	public class SingleThreadTests
+	public class SingleThreadTests : PerformanceTestBase
 	{
-		const int Iterations = 1000 * 1000 * 10;
+		const int Iterations = 1000 * 1000 * 40;
 
 		[TearDown]
 		public void Cleanup()
@@ -92,8 +92,8 @@ namespace Bmbsqd.Async.PerfTests
 
 		private static void ReportTime( long start, [CallerMemberName] string name = null )
 		{
-			var time = TimeSpan.FromSeconds( (Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency );
-			Console.WriteLine( "{0,30}: {1}", name, time );
+			var time = (Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency;
+			Console.WriteLine( "{0,30}: {1:0.000}", name, time );
 		}
 	}
 }

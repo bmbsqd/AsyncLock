@@ -25,12 +25,10 @@ namespace Bmbsqd.Async
 			_waiters = new ConcurrentQueue<WaiterBase>();
 		}
 
-		internal void Done( IAwaiter<IDisposable> waiter )
+		internal void Done( WaiterBase waiter )
 		{
-			var oldWaiter = Interlocked.CompareExchange( ref _current, null, waiter );
-			if( oldWaiter != waiter ) {
-				Debug.Assert( false, "Invalid end state", "Expected current waiter to be {0} but was {1}", waiter, oldWaiter );
-			}
+			var oldWaiter = Interlocked.Exchange( ref _current, null );
+			Debug.Assert( oldWaiter == waiter, "Invalid end state", "Expected current waiter to be {0} but was {1}", waiter, oldWaiter );
 			TryNext();
 		}
 
@@ -49,7 +47,7 @@ namespace Bmbsqd.Async
 
 		private void ReleaseControl()
 		{
-			if( Interlocked.CompareExchange( ref _current, null, Sentinel.Value ) != Sentinel.Value ) {
+			if( Interlocked.Exchange( ref _current, null ) != Sentinel.Value ) {
 				Debug.Assert( false, "Invalid revert state", "Expected current waiter to be {0} but was {1}", Sentinel.Value, _current );
 			}
 		}
@@ -61,9 +59,8 @@ namespace Bmbsqd.Async
 
 		private void RunWaiter( WaiterBase waiter )
 		{
-			if( Interlocked.Exchange( ref _current, waiter ) != Sentinel.Value ) {
-				Debug.Assert( false, "Invalid start state", "Expected current waiter to be {0} but was {1}", Sentinel.Value, _current );
-			}
+			Debug.Assert( _current == Sentinel.Value, "Invalid start state", "Expected current waiter to be {0} but was {1}", Sentinel.Value, _current );
+			_current = waiter;
 			waiter.Ready();
 		}
 
@@ -84,7 +81,6 @@ namespace Bmbsqd.Async
 			if( TryTakeControl() ) {
 				waiter = new NonBlockedWaiter( this );
 				RunWaiter( waiter );
-
 			}
 			else {
 				waiter = new AsyncLockWaiter( this );

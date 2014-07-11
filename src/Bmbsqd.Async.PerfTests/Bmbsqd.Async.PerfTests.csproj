@@ -46,9 +46,12 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PerformanceTestBase.cs" />
     <Compile Include="SingleThreadTests.cs" />
-    <Compile Include="MultiThreadTests.cs" />
+    <Compile Include="ControlledMultiThreadingTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Subjects.cs" />
+    <Compile Include="UncontrolledMultiThreadingTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
