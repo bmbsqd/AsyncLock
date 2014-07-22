@@ -8,20 +8,13 @@
 #endregion
 
 using System;
-using System.Diagnostics;
 using System.Threading;
 
 namespace Bmbsqd.Async
 {
-	internal sealed class AsyncLockWaiter : WaiterBase
+	internal sealed partial class AsyncLockWaiter : WaiterBase
 	{
 		private static readonly Action _marker = () => { };
-		private struct State
-		{
-			public const int Waiting = 0;
-			public const int Running = 1;
-			public const int Done = 2;
-		}
 
 		private class ContextAndAction
 		{
@@ -36,18 +29,6 @@ namespace Bmbsqd.Async
 
 			public ExecutionContext Context { get { return _context; } }
 			public Action Continuation { get { return _continuation; } }
-		}
-
-		private Action _continuation;
-		private int _state;
-		private ExecutionContext _executionContext;
-
-		public override void Ready()
-		{
-			Debug.Assert( _state == State.Waiting, "Unexpected state", "Expected state to be {0} but was {1}", State.Waiting, _state );
-			_state = State.Running;
-			var continuation = Interlocked.Exchange( ref _continuation, _marker );
-			ScheduleContinuation( _executionContext, continuation );
 		}
 
 		private static void ContinuationCallback( object state )
@@ -71,44 +52,48 @@ namespace Bmbsqd.Async
 			ThreadPool.UnsafeQueueUserWorkItem( ContinuationCallback, callbackState );
 		}
 
+		private Action _continuation;
+		private ExecutionContext _executionContext;
+
 		public AsyncLockWaiter( AsyncLock @lock )
 			: base( @lock )
 		{
 		}
 
+		public override void Ready()
+		{
+			ChangeState( State.Waiting, State.Running, "Unexpected state: Should be Waiting" );
+			var continuation = Interlocked.Exchange( ref _continuation, _marker );
+			ScheduleContinuation( _executionContext, continuation );
+		}
+
 		protected override void OnCompleted( Action continuation, bool captureExecutionContext )
 		{
-			Debug.Assert( _state != State.Running, "OnComplete() should never be called when state == Running" );
-			if( _state == State.Waiting ) {
-
-				if( captureExecutionContext ) {
-					_executionContext = ExecutionContext.Capture();
-				}
-
-				var placeholder = Interlocked.Exchange( ref _continuation, continuation );
-
-				if( placeholder == _marker ) {
-					// Between here and above state==Waiting check, 
-					// the Read() method has been called from another 
-					// thread, we should schedule the continuation 
-					// directly
-					ScheduleContinuation( _executionContext, continuation );
-				}
+			if( captureExecutionContext ) {
+				_executionContext = ExecutionContext.Capture();
 			}
-			else {
-				continuation();
+
+			var placeholder = Interlocked.Exchange( ref _continuation, continuation );
+			if( placeholder == _marker ) {
+				// Between start of this method and $here, 
+				// the Ready() method have been called from another 
+				// thread, we should schedule the continuation 
+				// directly
+				ScheduleContinuation( _executionContext, continuation );
 			}
 		}
 
-		public override bool IsCompleted // this is the AWAIT complete, not the waiter block
+		public override bool IsCompleted
 		{
-			get { return _state != State.Waiting; }
+			// since this is the async waiter, we will never 
+			// be complete here, and even if we would be, 
+			// the code would still behave correct
+			get { return false; }
 		}
 
 		public override void Dispose()
 		{
-			Debug.Assert( _state == State.Running, "Dispose() should only be called on a Running state" );
-			_state = State.Done;
+			ChangeState( State.Running, State.Done, "Unexpected state: Should be Running" );
 			base.Dispose();
 		}
 

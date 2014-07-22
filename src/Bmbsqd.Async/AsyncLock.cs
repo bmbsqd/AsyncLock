@@ -89,5 +89,10 @@ namespace Bmbsqd.Async
 			}
 			return waiter;
 		}
+
+		public override string ToString()
+		{
+			return "AsyncLock: " + (HasLock ? "Locked with " + WaitingCount + " queued waiters" : "Unlocked");
+		}
 	}
 }

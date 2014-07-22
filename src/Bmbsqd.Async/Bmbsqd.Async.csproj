@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncLock.cs" />
+    <Compile Include="AsyncLockWaiter.Debug.cs" />
     <Compile Include="IAwaitable.cs" />
     <Compile Include="IAwaiter.cs" />
     <Compile Include="NonBlockedWaiter.cs" />

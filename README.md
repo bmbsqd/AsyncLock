@@ -45,7 +45,3 @@ Worst case:
   - 3x Interlocked on enter
   - 1x Interlocked on exit
   - ConcurrentQueue Enqueue/TryDequeue calls
-
-## Future plans ##
-  - Move `GetAwaiter()` result to a struct and keep lock reference and potential heavier `Waiter` class references in the struct
-
