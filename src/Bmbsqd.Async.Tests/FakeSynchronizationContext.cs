@@ -5,25 +5,21 @@ namespace Bmbsqd.Async.Tests
 {
 	public class FakeSynchronizationContext : SynchronizationContext
 	{
-		private int _operationsPosted;
 		public override void Post( SendOrPostCallback d, object state )
 		{
-			_operationsPosted++;
+			OperationsPosted++;
 			Console.WriteLine( "Posted" );
 			base.Post( d, state );
 		}
 
 		public override void Send( SendOrPostCallback d, object state )
 		{
-			_operationsPosted++;
+			OperationsPosted++;
 			Console.WriteLine( "Sent" );
 			base.Send( d, state );
 		}
 
-		public int OperationsPosted
-		{
-			get { return _operationsPosted; }
-		}
+		public int OperationsPosted { get; private set; }
 
 		public override string ToString()
 		{

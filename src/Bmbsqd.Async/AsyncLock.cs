@@ -64,16 +64,10 @@ namespace Bmbsqd.Async
 			waiter.Ready();
 		}
 
-		public bool HasLock
-		{
-			get { return _current != null; }
-		}
+		public bool HasLock => _current != null;
 
-		private int WaitingCount
-		{
-			// only used in debug view
-			get { return _waiters.Count; }
-		}
+		// only used in debug view
+		private int WaitingCount => _waiters.Count;
 
 		public IAwaiter<IDisposable> GetAwaiter()
 		{

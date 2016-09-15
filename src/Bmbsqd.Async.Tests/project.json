@@ -1,0 +1,23 @@
+{
+	"version": "1.0.0-*",
+
+	"testRunner": "xunit",
+
+	"dependencies": {
+		"Bmbsqd.Async": "*",
+		"Microsoft.NETCore.App": {
+			"type": "platform",
+			"version": "1.0.0"
+		},
+		"System.Diagnostics.StackTrace": "4.0.1",
+		"System.Threading.Thread": "4.0.0",
+		"xunit": "2.2.0-*",
+		"dotnet-test-xunit": "2.2.0-*"
+	},
+
+	"frameworks": {
+		"netcoreapp1.0": {
+			"imports": "dnxcore50"
+		}
+	}
+}

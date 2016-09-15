@@ -10,25 +10,19 @@
 using System;
 using System.Threading;
 
-namespace Bmbsqd.Async
-{
-	internal sealed partial class AsyncLockWaiter : WaiterBase
-	{
+namespace Bmbsqd.Async {
+	internal sealed partial class AsyncLockWaiter : WaiterBase {
 		private static readonly Action _marker = () => { };
 
-		private class ContextAndAction
-		{
-			private readonly ExecutionContext _context;
-			private readonly Action _continuation;
-
+		private class ContextAndAction {
 			public ContextAndAction( ExecutionContext context, Action continuation )
 			{
-				_context = context;
-				_continuation = continuation;
+				Context = context;
+				Continuation = continuation;
 			}
 
-			public ExecutionContext Context { get { return _context; } }
-			public Action Continuation { get { return _continuation; } }
+			public ExecutionContext Context { get; }
+			public Action Continuation { get; }
 		}
 
 		private static void ContinuationCallback( object state )
@@ -36,9 +30,7 @@ namespace Bmbsqd.Async
 			var c = (ContextAndAction)state;
 			if( c.Context != null ) {
 				ExecutionContext.Run( c.Context, x => ((Action)x)(), c.Continuation );
-				c.Context.Dispose();
-			}
-			else {
+			} else {
 				c.Continuation();
 			}
 		}
@@ -49,16 +41,14 @@ namespace Bmbsqd.Async
 				return;
 
 			var callbackState = new ContextAndAction( executionContext, continuation );
-			ThreadPool.UnsafeQueueUserWorkItem( ContinuationCallback, callbackState );
+			ThreadPool.QueueUserWorkItem( ContinuationCallback, callbackState );
 		}
 
 		private Action _continuation;
 		private ExecutionContext _executionContext;
 
-		public AsyncLockWaiter( AsyncLock @lock )
-			: base( @lock )
-		{
-		}
+		public AsyncLockWaiter( AsyncLock @lock ) : base( @lock )
+		{ }
 
 		public override void Ready()
 		{
@@ -75,9 +65,9 @@ namespace Bmbsqd.Async
 
 			var placeholder = Interlocked.Exchange( ref _continuation, continuation );
 			if( placeholder == _marker ) {
-				// Between start of this method and $here, 
-				// the Ready() method have been called from another 
-				// thread, we should schedule the continuation 
+				// Between start of this method and $here,
+				// the Ready() method have been called from another
+				// thread, we should schedule the continuation
 				// directly
 				ScheduleContinuation( _executionContext, continuation );
 			}
@@ -85,8 +75,8 @@ namespace Bmbsqd.Async
 
 		public override bool IsCompleted
 		{
-			// since this is the async waiter, we will never 
-			// be complete here, and even if we would be, 
+			// since this is the async waiter, we will never
+			// be complete here, and even if we would be,
 			// the code would still behave correct
 			get { return false; }
 		}
@@ -97,9 +87,6 @@ namespace Bmbsqd.Async
 			base.Dispose();
 		}
 
-		public override string ToString()
-		{
-			return "AsyncWaiter: " + base.ToString();
-		}
+		public override string ToString() => "AsyncWaiter: " + base.ToString();
 	}
 }
