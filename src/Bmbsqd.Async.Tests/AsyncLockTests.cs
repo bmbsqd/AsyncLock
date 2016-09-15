@@ -4,14 +4,19 @@ using System.Linq;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
-using NUnit.Framework;
+using Xunit;
+using Xunit.Abstractions;
 
-namespace Bmbsqd.Async.Tests
-{
-	[TestFixture]
-	public class AsyncLockTests
-	{
-		[Test, Timeout( 1000 )]
+namespace Bmbsqd.Async.Tests {
+	public class AsyncLockTests {
+		private readonly ITestOutputHelper _output;
+
+		public AsyncLockTests( ITestOutputHelper output )
+		{
+			_output = output;
+		}
+
+		[Fact]
 		public async Task Simple()
 		{
 			var _lock = new AsyncLock();
@@ -19,26 +24,30 @@ namespace Bmbsqd.Async.Tests
 				Console.WriteLine( "Locked" );
 			}
 		}
-		
 
-		[Test]
+		public class ExpectedException : Exception {
+			public ExpectedException() { }
+			public ExpectedException( string message ) : base( message ) { }
+		}
+
+
+		[Fact]
 		public async Task ExceptionShouldFlow()
 		{
 			var _lock = new AsyncLock();
 
 			try {
 				using( await _lock ) {
-					throw new Exception( "Hello World" );
+					throw new ExpectedException( "Hello World" );
 				}
-				Assert.Fail( "Should never hit this line of code" );
+				throw new Exception( "Should never hit this line of code" );
 			}
-			catch( Exception e ) {
-				Assert.That( e.Message, Is.EqualTo( "Hello World" ) );
-				Trace.WriteLine( "Got Exception" );
+			catch( ExpectedException e ) {
+				Assert.Equal( "Hello World", e.Message );
 			}
 		}
 
-		[Test, Timeout( 500 ), Ignore( "No, current AsyncLock is NOT reentrant" )]
+		[Fact( Skip = "No, current AsyncLock is NOT reentrant" )]
 		public async Task ReentrantAware()
 		{
 			var _lock = new AsyncLock();
@@ -52,7 +61,7 @@ namespace Bmbsqd.Async.Tests
 		}
 
 
-		[Test, Timeout( 1000 )]
+		[Fact]
 		public async Task LockReleaseLockRelease()
 		{
 			var _lock = new AsyncLock();
@@ -65,23 +74,23 @@ namespace Bmbsqd.Async.Tests
 
 		}
 
-		[Test]
+		[Fact]
 		public async Task ExceptionShouldUnlockTheLock()
 		{
 			var _lock = new AsyncLock();
 
-			Assert.That( _lock.HasLock, Is.False );
+			Assert.False( _lock.HasLock );
 			try {
 				using( await _lock ) {
-					Assert.That( _lock.HasLock, Is.True );
-					throw new Exception();
+					Assert.True( _lock.HasLock );
+					throw new ExpectedException();
 				}
 			}
-			catch( Exception e ) { }
-			Assert.That( _lock.HasLock, Is.False );
+			catch( ExpectedException ) { }
+			Assert.False( _lock.HasLock );
 		}
-		
-		[Test]
+
+		[Fact]
 		public async Task ProperlyWaitsForReleaseAndCallsBackThruContext()
 		{
 			var _lock = new AsyncLock();
@@ -91,22 +100,20 @@ namespace Bmbsqd.Async.Tests
 			Action<int> next = expected => {
 				var oldValue = Interlocked.CompareExchange( ref successfullSteps, expected + 1, expected );
 				if( oldValue != expected ) {
-					Trace.WriteLine( string.Format( "Expected {0} but was {1}", expected, oldValue ) );
+					_output.WriteLine( "Expected {0} but was {1}", expected, oldValue );
 				}
 			};
 
 
 			await Task.Run( async () => {
-
 				var subTask = Task.Run( async () => {
 					await Task.Delay( 50 );
 					// assumes the lock is taken at this point
-					Assert.That( _lock.HasLock, Is.True );
+					Assert.True( _lock.HasLock );
 
 					using( var l = await _lock ) {
 						Console.WriteLine( l );
-						var properCallback1 = StackHelper.CurrentCallStack.Any( f => f.GetMethod().DeclaringType == typeof( ExecutionContext ) );
-						Assert.That( properCallback1, Is.True );
+						Assert.True( StackHelper.Text.Contains( "at System.Threading.ExecutionContext." ) ); // TODO: Until we have stacktrace / stack frame support
 						next( 2 );
 					}
 				} );
@@ -119,9 +126,9 @@ namespace Bmbsqd.Async.Tests
 				}
 
 				await subTask;
-			} );
+			}, CancellationToken.None );
 
-			Assert.That( successfullSteps, Is.EqualTo( 3 ) );
+			Assert.Equal( 3, successfullSteps );
 		}
 	}
 }

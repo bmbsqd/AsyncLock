@@ -1,0 +1,32 @@
+{
+	"version": "0.1.1-*",
+	"copyright": "Bombsquad Inc 2016",
+	"authors": [ "BMBSQD" ],
+	"description": "Non-blocking, fast and lightweight async/await-able lock",
+	"packOptions": {
+		"repository": {
+			"type": "git",
+			"url": "https://github.com/bmbsqd/AsyncLock/"
+		},
+		"owners": [ "BMBSQD" ],
+		"iconUrl": "http://www.gravatar.com/avatar/778137d42770f739df317b3cde5454ed.png?s=128",
+		"licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+		"requireLicenseAcceptance": false,
+		"releaseNotes": "Corification!",
+		"summary": "Faster",
+		"tags": [ "async", "lock", "await" ]
+
+	},
+	"dependencies": {
+		"System.Collections.Concurrent": "4.0.10",
+		"System.Diagnostics.Debug": "4.0.10",
+		"System.Threading": "4.0.10",
+		"System.Threading.Tasks": "4.0.10",
+		"System.Threading.ThreadPool": "4.0.10"
+	},
+	"frameworks": {
+		"netstandard1.3": {
+			"imports": "dnxcore50"
+		}
+	}
+}
