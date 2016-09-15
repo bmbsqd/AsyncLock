@@ -1,4 +1,4 @@
-AsyncLock
+AsyncLock (core)
 =========
 
 Async/Awaitable light, non-blocking lock in C#
