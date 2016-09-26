@@ -1,9 +1,9 @@
 {
 	"name": "Bmbsqd.AsyncLock",
 	"title": "AsyncLock",
-	"version": "0.2.1-*",
+	"version": "0.2.2-*",
 	"language": "en",
-	"copyright": "Bombsquad Inc 2016",
+	"copyright": "Bombsquad Inc 2015",
 	"authors": [ "BMBSQD" ],
 	"description": "Non-blocking, fast and lightweight async/await-able lock",
 	"projectUrl": "https://github.com/bmbsqd/AsyncLock/",
@@ -14,9 +14,9 @@
 		},
 		"owners": [ "BMBSQD" ],
 		"iconUrl": "http://www.gravatar.com/avatar/778137d42770f739df317b3cde5454ed.png?s=128",
-		"licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+		"licenseUrl": "https://raw.githubusercontent.com/bmbsqd/AsyncLock/master/LICENSE",
 		"requireLicenseAcceptance": false,
-		"releaseNotes": "Corification!",
+		"releaseNotes": "Switched to MIT license",
 		"summary": "Faster",
 		"tags": [ "async", "lock", "await" ]
 
