@@ -4,26 +4,15 @@ namespace Bmbsqd.Async
 {
 	internal sealed class NonBlockedWaiter : WaiterBase
 	{
-		public NonBlockedWaiter( AsyncLock @lock )
-			: base( @lock )
+		public NonBlockedWaiter(AsyncLock @lock)
+			: base(@lock)
 		{
 		}
 
-		protected override void OnCompleted( Action continuation, bool captureExecutionContext )
-		{
-			if( continuation != null ) {
-				continuation();
-			}
-		}
+		public override bool IsCompleted => true;
 
-		public override bool IsCompleted
-		{
-			get { return true; }
-		}
+		public override string ToString() => "NonBlockingWaiter: " + base.ToString();
 
-		public override string ToString()
-		{
-			return "NonBlockingWaiter: " + base.ToString();
-		}
+		protected override void OnCompleted(Action continuation, bool captureExecutionContext) => continuation?.Invoke();
 	}
 }

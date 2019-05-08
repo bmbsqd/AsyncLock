@@ -1,5 +1,4 @@
-﻿#region MIT License
-/*
+﻿/*
 MIT License
 
 Copyright (c) 2016 Bombsquad Inc
@@ -22,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#endregion
 
 using System;
 using System.Collections.Concurrent;
@@ -31,55 +29,13 @@ using System.Threading;
 
 namespace Bmbsqd.Async
 {
-	[DebuggerDisplay( "HasLock = {HasLock}, Waiting = {WaitingCount}" )]
+	[DebuggerDisplay("HasLock = {HasLock}, Waiting = {WaitingCount}")]
 	public class AsyncLock : IAwaitable<IDisposable>
 	{
-		private object _current;
 		private readonly ConcurrentQueue<WaiterBase> _waiters;
+		private object _current;
 
-		public AsyncLock()
-		{
-			_waiters = new ConcurrentQueue<WaiterBase>();
-		}
-
-		internal void Done( WaiterBase waiter )
-		{
-			var oldWaiter = Interlocked.Exchange( ref _current, null );
-			Debug.Assert( oldWaiter == waiter, "Invalid end state", "Expected current waiter to be {0} but was {1}", waiter, oldWaiter );
-			TryNext();
-		}
-
-		private void TryNext()
-		{
-			if( TryTakeControl() ) {
-				WaiterBase waiter;
-				if( _waiters.TryDequeue( out waiter ) ) {
-					RunWaiter( waiter );
-				}
-				else {
-					ReleaseControl();
-				}
-			}
-		}
-
-		private void ReleaseControl()
-		{
-			if( Interlocked.Exchange( ref _current, null ) != Sentinel.Value ) {
-				Debug.Assert( false, "Invalid revert state", "Expected current waiter to be {0} but was {1}", Sentinel.Value, _current );
-			}
-		}
-
-		private bool TryTakeControl()
-		{
-			return Interlocked.CompareExchange( ref _current, Sentinel.Value, null ) == null;
-		}
-
-		private void RunWaiter( WaiterBase waiter )
-		{
-			Debug.Assert( _current == Sentinel.Value, "Invalid start state", "Expected current waiter to be {0} but was {1}", Sentinel.Value, _current );
-			_current = waiter;
-			waiter.Ready();
-		}
+		public AsyncLock() => _waiters = new ConcurrentQueue<WaiterBase>();
 
 		public bool HasLock => _current != null;
 
@@ -89,21 +45,60 @@ namespace Bmbsqd.Async
 		public IAwaiter<IDisposable> GetAwaiter()
 		{
 			WaiterBase waiter;
-			if( TryTakeControl() ) {
-				waiter = new NonBlockedWaiter( this );
-				RunWaiter( waiter );
+			if (TryTakeControl())
+			{
+				waiter = new NonBlockedWaiter(this);
+				RunWaiter(waiter);
 			}
-			else {
-				waiter = new AsyncLockWaiter( this );
-				_waiters.Enqueue( waiter );
+			else
+			{
+				waiter = new AsyncLockWaiter(this);
+				_waiters.Enqueue(waiter);
 				TryNext();
 			}
 			return waiter;
 		}
 
-		public override string ToString()
+		public override string ToString() => "AsyncLock: " + (HasLock ? "Locked with " + WaitingCount + " queued waiters" : "Unlocked");
+
+		internal void Done(WaiterBase waiter)
 		{
-			return "AsyncLock: " + (HasLock ? "Locked with " + WaitingCount + " queued waiters" : "Unlocked");
+			var oldWaiter = Interlocked.Exchange(ref _current, null);
+			Debug.Assert(oldWaiter == waiter, "Invalid end state", string.Format("Expected current waiter to be {0} but was {1}", waiter, oldWaiter));
+			TryNext();
 		}
+
+		private void ReleaseControl()
+		{
+			if (Interlocked.Exchange(ref _current, null) != Sentinel.Value)
+			{
+				Debug.Assert(false, "Invalid revert state", string.Format("Expected current waiter to be {0} but was {1}", Sentinel.Value, _current));
+			}
+		}
+
+		private void RunWaiter(WaiterBase waiter)
+		{
+			Debug.Assert(_current == Sentinel.Value, "Invalid start state", string.Format("Expected current waiter to be {0} but was {1}", Sentinel.Value, _current));
+			_current = waiter;
+			waiter.Ready();
+		}
+
+		private void TryNext()
+		{
+			if (TryTakeControl())
+			{
+				WaiterBase waiter;
+				if (_waiters.TryDequeue(out waiter))
+				{
+					RunWaiter(waiter);
+				}
+				else
+				{
+					ReleaseControl();
+				}
+			}
+		}
+
+		private bool TryTakeControl() => Interlocked.CompareExchange(ref _current, Sentinel.Value, null) == null;
 	}
 }

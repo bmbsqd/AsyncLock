@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Bmbsqd.Async", "Bmbsqd.Async\Bmbsqd.Async.xproj", "{AA234FDA-E6F9-4175-9AF7-B8225E6204C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bmbsqd.Async", "Bmbsqd.Async\Bmbsqd.Async.csproj", "{AA234FDA-E6F9-4175-9AF7-B8225E6204C4}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Bmbsqd.Async.Tests", "Bmbsqd.Async.Tests\Bmbsqd.Async.Tests.xproj", "{EEEEEFD6-E6F9-4175-9AF7-B8225E6204C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bmbsqd.Async.Tests", "Bmbsqd.Async.Tests\Bmbsqd.Async.Tests.csproj", "{EEEEEFD6-E6F9-4175-9AF7-B8225E6204C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +24,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {15EE613E-057C-4481-8654-5D52EEFA233D}
 	EndGlobalSection
 EndGlobal
