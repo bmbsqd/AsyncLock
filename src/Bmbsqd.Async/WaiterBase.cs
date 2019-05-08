@@ -7,42 +7,22 @@ namespace Bmbsqd.Async
 	{
 		protected readonly AsyncLock _lock;
 
-		protected WaiterBase( AsyncLock @lock )
-		{
-			_lock = @lock;
-		}
+		protected WaiterBase(AsyncLock @lock) => _lock = @lock;
 
 		public abstract bool IsCompleted { get; }
 
-		public IDisposable GetResult()
-		{
-			return this;
-		}
+		public virtual void Dispose() => _lock.Done(this);
 
-		public virtual void Ready()
-		{
-		}
+		public IDisposable GetResult() => this;
 
-		public virtual void Dispose()
-		{
-			_lock.Done( this );
-		}
+		public void OnCompleted(Action continuation) => OnCompleted(continuation, true);
 
-		public override string ToString()
-		{
-			return GetHashCode().ToString( "x8", CultureInfo.InvariantCulture );
-		}
+		public virtual void Ready() { }
 
-		protected abstract void OnCompleted( Action continuation, bool captureExecutionContext );
+		public override string ToString() => GetHashCode().ToString("x8", CultureInfo.InvariantCulture);
 
-		public void OnCompleted( Action continuation )
-		{
-			OnCompleted( continuation, true );
-		}
+		public void UnsafeOnCompleted(Action continuation) => OnCompleted(continuation, false);
 
-		public void UnsafeOnCompleted( Action continuation )
-		{
-			OnCompleted( continuation, false );
-		}
+		protected abstract void OnCompleted(Action continuation, bool captureExecutionContext);
 	}
 }

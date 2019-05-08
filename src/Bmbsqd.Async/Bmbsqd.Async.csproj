@@ -1,60 +1,31 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{44183230-BCCC-4F04-AE96-9279D0D86E34}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Bmbsqd.Async</RootNamespace>
-    <AssemblyName>Bmbsqd.Async</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <Description>Non-blocking, fast and lightweight async/await-able lock</Description>
+    <Copyright>Bombsquad Inc 2015-2019</Copyright>
+    <AssemblyTitle>AsyncLock</AssemblyTitle>
+    <Authors>BMBSQD</Authors>
+    <TargetFrameworks>net20;net35;net40;net45;net46;netstandard1.3;netstandard2.0;netcoreapp2.0;netcoreapp2.1</TargetFrameworks>
+    <AssemblyName>Bmbsqd.AsyncLock</AssemblyName>
+    <PackageId>Bmbsqd.Async</PackageId>
+    <PackageTags>async;lock;await</PackageTags>
+    <PackageReleaseNotes>Added support for more frameworks.</PackageReleaseNotes>
+    <PackageIconUrl>http://www.gravatar.com/avatar/778137d42770f739df317b3cde5454ed.png?s=128</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/bmbsqd/AsyncLock/</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/bmbsqd/AsyncLock/</RepositoryUrl>
+    <IncludeSource>true</IncludeSource>
+    <IncludeSymbols>true</IncludeSymbols>
+    <Version>0.3.0</Version>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>AsyncLock.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+    <PackageReference Include="System.Threading.ThreadPool">
+      <Version>4.3.0</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncLock.cs" />
-    <Compile Include="AsyncLockWaiter.Debug.cs" />
-    <Compile Include="IAwaitable.cs" />
-    <Compile Include="IAwaiter.cs" />
-    <Compile Include="NonBlockedWaiter.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sentinel.cs" />
-    <Compile Include="AsyncLockWaiter.cs" />
-    <Compile Include="WaiterBase.cs" />
+    <PackageReference Include="Theraot.Core" Version="3.0.2" Condition=" '$(TargetFramework)' != 'netstandard2.0' " />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Bmbsqd.Async.nuspec" />
-    <None Include="build.cmd" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
