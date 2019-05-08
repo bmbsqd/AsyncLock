@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Non-blocking, fast and lightweight async/await-able lock</Description>
-    <Copyright>Bombsquad Inc 2015</Copyright>
+    <Copyright>Bombsquad Inc 2015-2019</Copyright>
     <AssemblyTitle>AsyncLock</AssemblyTitle>
-    <VersionPrefix>0.2.2</VersionPrefix>
     <Authors>BMBSQD</Authors>
     <TargetFrameworks>net20;net35;net40;net45;net46;netstandard1.3;netstandard2.0;netcoreapp2.0;netcoreapp2.1</TargetFrameworks>
     <AssemblyName>Bmbsqd.AsyncLock</AssemblyName>
@@ -17,6 +16,9 @@
     <RepositoryUrl>https://github.com/bmbsqd/AsyncLock/</RepositoryUrl>
     <IncludeSource>true</IncludeSource>
     <IncludeSymbols>true</IncludeSymbols>
+    <Version>0.3.0</Version>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>AsyncLock.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.Threading.ThreadPool">
